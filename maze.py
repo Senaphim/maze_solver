@@ -19,6 +19,7 @@ class Maze:
         self._ceate_cells()
         self._break_entrance_and_exit()
         self._break_walls_r(0, 0)
+        self._reset_cells_visited()
 
     def _ceate_cells(self):
         for i in range(self.num_columns):
@@ -33,20 +34,20 @@ class Maze:
                 cell = Cell(point_a, point_b, self._win)
                 column.append(cell)
             self._cells.append(column)
-        self._draw_cells()
+        for i in range(self.num_columns):
+            for j in range(self.num_rows):
+                self._draw_cell(i, j)
 
     # This is kind of redundant, but is included to structure as expected by bootdev.
-    def _draw_cells(self): 
+    def _draw_cell(self, i, j): 
         if self._win is None:
             return
-        for i in range(len(self._cells)):
-            for j in range(len(self._cells[i])):
-                self._cells[i][j].draw()
-                self._animate()
+        self._cells[i][j].draw()
+        self._animate()
 
     def _animate(self):
         self._win.redraw()
-        time.sleep(0.05)
+        time.sleep(0.01)
 
     def _break_entrance_and_exit(self):
         self._cells[0][0].has_top_wall = False
@@ -72,8 +73,7 @@ class Maze:
 
             # If nowhere to go, draw cell
             if len(neighbours_unvisited) == 0:
-                self._cells[i][j].draw()
-                self._animate()
+                self._draw_cell(i, j)
                 return
 
             # Select random directiion to go
@@ -97,6 +97,64 @@ class Maze:
                     self._cells[i][j].has_top_wall = False
                     self._cells[i][j-1].has_bottom_wall = False
                     self._break_walls_r(i, j-1)
+                case _:
+                    pass
+   
+    def _reset_cells_visited(self):
+        for i in range(len(self._cells)):
+            for j in range(len(self._cells[i])):
+                self._cells[i][j].visited = False
 
+    def solve(self):
+        return self._solve_r(0, 0)
 
+    def _solve_r(self, i, j):
+        self._animate()
+        self._cells[i][j].visited = True
+        if i == self.num_columns - 1 and j == self.num_rows - 1:
+            return True
+        # List of possible neighbours
+        neighbours_index = [[i+1, j], [i-1, j], [i, j+1], [i, j-1]]
+        current_cell = self._cells[i][j]
 
+        # Loop through neighbours to find cells to visit
+        for pair in neighbours_index:
+            if pair[0] < 0 or pair[1] < 0:
+                continue
+            if pair[0] >= self.num_columns or pair[1] >= self.num_rows:
+                continue
+            neighbour_cell = self._cells[pair[0]][pair[1]]
+
+            # Match direction and draw move to that cell if valid
+            match pair:
+                case [x, y] if x == i+1:
+                    if not current_cell.has_right_wall and not neighbour_cell.visited:
+                        current_cell.draw_move(neighbour_cell)
+                        if self._solve_r(x, y):
+                            return True
+                        else:
+                            current_cell.draw_move(neighbour_cell, undo=True)
+                case [x, y] if x == i-1:
+                    if not current_cell.has_left_wall and not neighbour_cell.visited:
+                        current_cell.draw_move(neighbour_cell)
+                        if self._solve_r(x, y):
+                            return True
+                        else:
+                            current_cell.draw_move(neighbour_cell, undo=True)
+                case [x, y] if y == j+1:
+                    if not current_cell.has_bottom_wall and not neighbour_cell.visited:
+                        current_cell.draw_move(neighbour_cell)
+                        if self._solve_r(x, y):
+                            return True
+                        else:
+                            current_cell.draw_move(neighbour_cell, undo=True)
+                case [x, y] if y == j-1:
+                    if not current_cell.has_top_wall and not neighbour_cell.visited:
+                        current_cell.draw_move(neighbour_cell)
+                        if self._solve_r(x, y):
+                            return True
+                        else:
+                            current_cell.draw_move(neighbour_cell, undo=True)
+
+        # All directions exhausted and no route found
+        return False

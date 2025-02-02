@@ -91,7 +91,7 @@ class Cell:
                 (other._x1 + other._x2)//2, (other._y1 + other._y2)//2
         )
         connecting_line = Line(centre_self, centre_other)
-        colour = "gray"
+        colour = "red"
         if undo:
-            colour = "red"
+            colour = "grey"
         self.win.draw_line(connecting_line, fill_colour=colour)
