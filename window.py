@@ -4,7 +4,7 @@ class Window:
     def __init__(self, width, height):
         self.__root = Tk()
         self.__root.title("Mazer 9000")
-        self.__canvas = Canvas(self.__root, bg="blue", height=height, width=width)
+        self.__canvas = Canvas(self.__root, bg="black", height=height, width=width)
         self.__canvas.pack(fill=BOTH, expand=1)
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
@@ -38,3 +38,45 @@ class Line:
         canvas.create_line(
                 self.a.x, self.a.y, self.b.x, self.b.y, fill=fill_colour, width=width
         )
+
+class Cell:
+    def __init__(self, top_left, bottom_right, win,
+                 left=True, right=True, top=True, bottom=True):
+        self._x1 = top_left.x
+        self._y1 = top_left.y
+        self._x2 = bottom_right.x
+        self._y2 = bottom_right.y
+        self.has_left_wall = left
+        self.has_right_wall = right
+        self.has_top_wall = top
+        self.has_bottom_wall = bottom
+        self.win = win
+
+    def draw(self):
+        if self.win is None:
+            return
+        if self.has_left_wall:
+            line = Line(Point(self._x1, self._y1), Point(self._x1, self._y2))
+            self.win.draw_line(line)
+        if self.has_right_wall:
+            line = Line(Point(self._x2, self._y1), Point(self._x2, self._y2))
+            self.win.draw_line(line)
+        if self.has_top_wall:
+            line = Line(Point(self._x1, self._y1), Point(self._x2, self._y1))
+            self.win.draw_line(line)
+        if self.has_bottom_wall:
+            line = Line(Point(self._x1, self._y2), Point(self._x2, self._y2))
+            self.win.draw_line(line)
+
+    def draw_move(self, other, undo=False):
+        centre_self = Point(
+                (self._x1 + self._x2)//2, (self._y1 + self._y2)//2
+        )
+        centre_other = Point(
+                (other._x1 + other._x2)//2, (other._y1 + other._y2)//2
+        )
+        connecting_line = Line(centre_self, centre_other)
+        colour = "gray"
+        if undo:
+            colour = "red"
+        self.win.draw_line(connecting_line, fill_colour=colour)
