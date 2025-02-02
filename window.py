@@ -40,7 +40,7 @@ class Line:
         )
 
 class Cell:
-    def __init__(self, top_left, bottom_right, win,
+    def __init__(self, top_left, bottom_right, win=None,
                  left=True, right=True, top=True, bottom=True):
         self._x1 = top_left.x
         self._y1 = top_left.y
@@ -64,11 +64,19 @@ class Cell:
         if self.has_top_wall:
             line = Line(Point(self._x1, self._y1), Point(self._x2, self._y1))
             self.win.draw_line(line)
+        else:
+            line = Line(Point(self._x1, self._y1), Point(self._x2, self._y1))
+            self.win.draw_line(line, fill_colour="black")
         if self.has_bottom_wall:
             line = Line(Point(self._x1, self._y2), Point(self._x2, self._y2))
             self.win.draw_line(line)
+        else:
+            line = Line(Point(self._x1, self._y2), Point(self._x2, self._y2))
+            self.win.draw_line(line, fill_colour="black")
 
     def draw_move(self, other, undo=False):
+        if self.win is None:
+            return
         centre_self = Point(
                 (self._x1 + self._x2)//2, (self._y1 + self._y2)//2
         )
