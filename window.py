@@ -50,6 +50,7 @@ class Cell:
         self.has_right_wall = right
         self.has_top_wall = top
         self.has_bottom_wall = bottom
+        self.visited = False
         self.win = win
 
     def draw(self):
@@ -58,9 +59,15 @@ class Cell:
         if self.has_left_wall:
             line = Line(Point(self._x1, self._y1), Point(self._x1, self._y2))
             self.win.draw_line(line)
+        else:
+            line = Line(Point(self._x1, self._y1), Point(self._x1, self._y2))
+            self.win.draw_line(line, fill_colour="black")
         if self.has_right_wall:
             line = Line(Point(self._x2, self._y1), Point(self._x2, self._y2))
             self.win.draw_line(line)
+        else:
+            line = Line(Point(self._x2, self._y1), Point(self._x2, self._y2))
+            self.win.draw_line(line, fill_colour="black")
         if self.has_top_wall:
             line = Line(Point(self._x1, self._y1), Point(self._x2, self._y1))
             self.win.draw_line(line)
